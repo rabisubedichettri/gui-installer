@@ -13,6 +13,7 @@ import urllib.request
 import zipfile
 import io
 import threading
+import sys
 
 
 def parse_env_file(file_path=".env"):
@@ -55,7 +56,6 @@ def move_bat_to_desktop_folder(bat_file_path, folder_name="Website"):
     # Copy the file
     shutil.copy2(bat_file_path, target_bat_path)
 
-    print(f"✅ {bat_filename} moved to {target_folder}")
 
 def download_and_setup():
     def task():
@@ -117,7 +117,8 @@ def download_and_setup():
             server_venv_path = os.path.join(server_dir, "venv")
             if not os.path.exists(server_venv_path):
                 update_status("\u2699\ufe0f Creating virtual environment....")
-                subprocess.run(["python", "-m", "venv", server_venv_path], check=True)
+                subprocess.run(["python", "-m", "venv", server_venv_path],creationflags = subprocess.CREATE_NO_WINDOW,
+                               check=True)
                 update_status("\u2705 Created Virtual environment.")
             else:
                 update_status("\ud83d\udce6 Using existing virtual environment.")
@@ -129,13 +130,13 @@ def download_and_setup():
             # install requirements for server        
             if os.path.exists(req_file):
                 update_status("\ud83d\udcc5 Installing from requirements.txt...")
-                subprocess.run([server_pip_path, "install", "-r", req_file], check=True)
+                subprocess.run([server_pip_path, "install", "-r", req_file],creationflags = subprocess.CREATE_NO_WINDOW, check=True)
             
             update_status("\ud83d\udcc2 Running migrations...")
-            subprocess.run([server_python_path, "manage.py", "makemigrations"], cwd=server_dir, check=True)
+            subprocess.run([server_python_path, "manage.py", "makemigrations"], cwd=server_dir, check=True,creationflags = subprocess.CREATE_NO_WINDOW)
 
             update_status("\ud83d\udcc2 Applying migrations...")
-            subprocess.run([server_python_path, "manage.py", "migrate"], cwd=server_dir, check=True)
+            subprocess.run([server_python_path, "manage.py", "migrate"], cwd=server_dir, check=True,creationflags = subprocess.CREATE_NO_WINDOW)
 
             # server config ends
 
@@ -145,6 +146,7 @@ def download_and_setup():
             if not os.path.exists(system_venv_path):
                 update_status("\u2699\ufe0f Creating virtual environment")
                 subprocess.run(["python", "-m", "venv", system_venv_path], check=True)
+
                 update_status("\u2705 Created virtual environment")
             else:
                 update_status("\ud83d\udce6 Using existing virtual environment.")
@@ -154,13 +156,13 @@ def download_and_setup():
 
             current_file_path = os.path.abspath(__file__)
             current_directory = os.path.dirname(current_file_path)
+            
             req_file = os.path.join(current_directory, "system", "requirements.txt")
             if os.path.exists(req_file):
                 update_status("\ud83d\udcc5 Installing from requirements.txt...")
                 subprocess.run([system_pip_path, "install", "-r", req_file], check=True)
             # batFile=os.path.join(current_directory, "system", "controller.bat")
             pycontroller=os.path.join(current_directory, "system", "controller.py")
-            print(server_dir)
             shutil.copy(pycontroller,system_dir)
 
             
@@ -191,7 +193,8 @@ def download_and_setup():
             shorcut_dir = os.path.join(os.path.expanduser("~"), "Desktop", "Website")
 
             # Open File Explorer to that folder
-            subprocess.run(["explorer", shorcut_dir])
+            subprocess.run(["explorer", shorcut_dir],creationflags = subprocess.CREATE_NO_WINDOW)
+
             update_status("opening shorcuts in file explore and you can see there")
 
 
@@ -224,7 +227,7 @@ def browse_folder():
         project_path.set(folder)
 
 root = tk.Tk()
-root.title("RSC Software (e-learning) Installer")
+root.title("RSC Software Installer")
 root.geometry("650x500")
 root.resizable(False, False)
 root.configure(bg="#f0f2f5")
